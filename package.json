@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "archiver": "^6.0.1",
+    "axios-retry": "^4.5.0",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "discord.js": "^14.13.0",

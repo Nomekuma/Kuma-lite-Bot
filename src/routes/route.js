@@ -51,48 +51,48 @@ const commands = [
     name: "help",
     description: "Provides a list of commands",
   },
-  // {
-  //   name: "search",
-  //   description: "Search for a webtoon",
-  //   options: [
-  //     {
-  //       name: "keyword",
-  //       description: "Keyword to search for",
-  //       type: 3,
-  //       required: true,
-  //     },
-  //   ],
-  // },
-  // {
-  //   name: "download",
-  //   description: "Download a webtoon",
-  //   options: [
-  //     {
-  //       name: "webtoonid",
-  //       description: "ID of the webtoon",
-  //       type: 3,
-  //       required: true,
-  //     },
-  //     {
-  //       name: "chapterno",
-  //       description: "Chapter number of the webtoon",
-  //       type: 3,
-  //       required: true,
-  //     },
-  //     {
-  //       name: "nid_aut",
-  //       description: "NID_AUT cookie value",
-  //       type: 3,
-  //       required: false,
-  //     },
-  //     {
-  //       name: "nid_ses",
-  //       description: "NID_SES cookie value",
-  //       type: 3,
-  //       required: false,
-  // },
-  // ],
-  // },
+  {
+    name: "search",
+    description: "Search for a webtoon",
+    options: [
+      {
+        name: "keyword",
+        description: "Keyword to search for",
+        type: 3,
+        required: true,
+      },
+    ],
+  },
+  {
+    name: "download",
+    description: "Download a webtoon",
+    options: [
+      {
+        name: "webtoonid",
+        description: "ID of the webtoon",
+        type: 3,
+        required: true,
+      },
+      {
+        name: "chapterno",
+        description: "Chapter number of the webtoon",
+        type: 3,
+        required: true,
+      },
+      {
+        name: "nid_aut",
+        description: "NID_AUT cookie value",
+        type: 3,
+        required: false,
+      },
+      {
+        name: "nid_ses",
+        description: "NID_SES cookie value",
+        type: 3,
+        required: false,
+      },
+    ],
+  },
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);

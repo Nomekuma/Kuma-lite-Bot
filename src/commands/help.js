@@ -37,6 +37,14 @@ export async function handleHelpCommand(interaction) {
       {
         name: "`/randommanga`",
         value: "Get information about a random manga",
+      },
+      {
+        name: "`/search <query>`",
+        value: "Search for a webtoon",
+      },
+      {
+        name: "`/download <titleId> <no> <authId> <sessionId>`",
+        value: "Download a webtoon",
       }
     )
     .setTimestamp(new Date())
