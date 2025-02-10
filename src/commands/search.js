@@ -4,57 +4,50 @@ import axios from "axios";
 /**
  * handleSearchCommand - search for a webtoon
  * @param {*} interaction
- * @param {*} fetch
- * @returns
- * @see https://discordjs.guide/popular-topics/embeds.html#using-the-embed-constructor
  */
 export async function handleSearchCommand(interaction) {
   const keyword = interaction.options.getString("keyword");
-  const maxRetries = 5; // Maximum number of retries
+  if (!keyword) {
+    interaction.reply("Please provide a keyword to search for a webtoon.");
+    return;
+  }
 
+  const encodedKeyword = encodeURIComponent(keyword);
+  const apiUrl = `https://korea-webtoon-api-cc7dda2f0d77.herokuapp.com/webtoons?keyword=${encodedKeyword}&provider=NAVER&page=1&perPage=30&sort=ASC`;
+
+  const maxRetries = 5;
   let retries = 0;
+
   while (retries < maxRetries) {
     try {
-      const response = await axios.get(
-        `https://korea-webtoon-api.herokuapp.com/search?keyword=${keyword}`
-      );
+      const response = await axios.get(apiUrl);
       const data = response.data;
-      console.log(data);
+
       if (data.webtoons.length > 0) {
         const firstWebtoon = data.webtoons[0];
+
         const embed = new EmbedBuilder()
-          .setTitle(firstWebtoon.title)
+          .setTitle(firstWebtoon.title || "No title found")
           .setColor(0x0099ff)
           .addFields(
-            {
-              name: "Author",
-              value: firstWebtoon.author || "No author found",
-            },
-            {
-              name: "title",
-              value: firstWebtoon.title || "No title found",
-            },
-            {
-              name: "id",
-              value:
-                String(firstWebtoon.webtoonId).substring(7) || "No id found",
-            },
-            {
-              name: "url",
-              value: firstWebtoon.url || "No url found",
-            }
+            { name: "Author", value: firstWebtoon.authors?.join(", ") || "No author found" },
+            { name: "Provider", value: firstWebtoon.provider || "Unknown" },
+            { name: "Status", value: firstWebtoon.isEnd ? "Completed" : "Ongoing" },
+            { name: "Age Rating", value: firstWebtoon.ageGrade ? `${firstWebtoon.ageGrade}+` : "All ages" },
+            { name: "URL", value: `[Read here](${firstWebtoon.url})` || "No URL found" }
           )
-          .setImage(firstWebtoon.img)
+          .setImage(firstWebtoon.thumbnail?.[0] || "")
           .setTimestamp()
           .setFooter({
             text: "Powered by Nomekuma",
             iconURL: "https://avatars.githubusercontent.com/u/122863540?v=4",
           });
-        interaction.reply({ embeds: [embed.toJSON()] });
-        return; // Exit function after successful response
+
+        interaction.reply({ embeds: [embed] });
+        return;
       } else {
         interaction.reply("No webtoons found for the given keyword.");
-        return; // Exit function after replying
+        return;
       }
     } catch (error) {
       console.error(`Attempt ${retries + 1} failed: ${error.message}`);
@@ -62,6 +55,5 @@ export async function handleSearchCommand(interaction) {
     }
   }
 
-  // If all retries fail
   interaction.reply("An error occurred while searching for webtoons.");
 }
