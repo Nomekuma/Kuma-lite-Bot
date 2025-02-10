@@ -61,12 +61,12 @@ client.on("interactionCreate", async (interaction) => {
     case "help":
       await handleHelpCommand(interaction);
       break;
-    // case "search":
-    //   await handleSearchCommand(interaction);
-    //   break;
-    // case "download":
-    //   await handleDownloadCommand(interaction);
-    //   break;
+    case "search":
+      await handleSearchCommand(interaction);
+      break;
+    case "download":
+      await handleDownloadCommand(interaction);
+      break;
     default:
       break;
   }
