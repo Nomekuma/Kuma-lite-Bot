@@ -1,12 +1,15 @@
 import { EmbedBuilder } from "discord.js";
-import axios from "axios";
-import axiosRetry from "axios-retry";
+import * as xlsx from "xlsx";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Configure Axios to retry failed requests
-axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+// Define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
- * handleSearchCommand - search for a webtoon
+ * handleSearchCommand - search for a webtoon from a CSV file
  * @param {*} interaction - The Discord interaction object
  */
 export async function handleSearchCommand(interaction) {
@@ -22,23 +25,21 @@ export async function handleSearchCommand(interaction) {
       });
     }
 
-    // Fetch webtoon data from API
-    const apiUrl = `https://korea-webtoon-api-cc7dda2f0d77.herokuapp.com/webtoons?keyword=${encodeURIComponent(
-      keyword
-    )}&provider=NAVER`;
+    // Load CSV file
+    const filePath = path.join(__dirname, "webtoons", "naver.csv");
+    const fileBuffer = fs.readFileSync(filePath, "utf-8");
 
-    const response = await axios.get(apiUrl, {
-      timeout: 10000, // 10-second timeout
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
-    });
+    // Read CSV file as a workbook
+    const workbook = xlsx.read(fileBuffer, { type: "string" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const webtoons = xlsx.utils.sheet_to_json(sheet, { raw: false });
 
-    const webtoons = response.data.webtoons;
+    // Filter webtoons by keyword
+    const results = webtoons.filter((webtoon) =>
+      webtoon.title.toLowerCase().includes(keyword.toLowerCase())
+    );
 
-    if (!webtoons || webtoons.length === 0) {
+    if (results.length === 0) {
       return interaction.reply({
         content: "No webtoons found for that search query.",
         ephemeral: true,
@@ -51,12 +52,11 @@ export async function handleSearchCommand(interaction) {
       .setColor(0x00aaff)
       .setFooter({ text: `Results for: ${keyword}` });
 
-    webtoons.forEach((webtoon, index) => {
+    results.slice(0, 5).forEach((webtoon, index) => {
       embed.addFields({
         name: `${index + 1}. ${webtoon.title}`,
-        value: `[Read Here](${webtoon.url}) | Author: ${webtoon.authors.join(
-          ", "
-        )}`,
+        value: `Author: ${webtoon.author}\nGenre: ${webtoon.genre}\nRating: ${webtoon.rating}\nDate: ${webtoon.date}\nCompleted: ${webtoon.completed}\nAge: ${webtoon.age}\nFree: ${webtoon.free}\n[Link](${webtoon.link})`,
+
         inline: false,
       });
     });
@@ -66,14 +66,8 @@ export async function handleSearchCommand(interaction) {
   } catch (error) {
     console.error("Error fetching webtoons:", error);
 
-    let errorMessage = "An error occurred while searching for webtoons.";
-
-    if (error.code === "ERR_SOCKET_CONNECTION_TIMEOUT") {
-      errorMessage = "The request timed out. Please try again later.";
-    }
-
     await interaction.reply({
-      content: errorMessage,
+      content: "An error occurred while searching for webtoons.",
       ephemeral: true,
     });
   }
